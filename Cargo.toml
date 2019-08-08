@@ -5,7 +5,7 @@ authors = ["grinshpon <grinshpondaniel@protonmail.com>"]
 edition = "2018"
 license = "Zlib"
 repository = "https://github.com/Grinshpon/red"
-description = "A vim-like terminal based text editor written in Rust. Extremely early in production. No functionality whatsoever yet."
+description = "Red: A vim-like terminal based text editor written in Rust. Extremely early in production. No functionality whatsoever yet."
 
 include = [
   "Cargo.toml",
