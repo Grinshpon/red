@@ -1,0 +1,13 @@
+<svg width="360" height="128">
+  <svg id="logo" viewBox="0 0 720 256">
+    <style> .name { font: 60px arial; } </style>
+    <polygon points="0,0 0,256 240,256" style="fill:#FC0404" opacity="0.8"/>
+    <polygon points="0,0 240,56 0,128" style="fill:#CC0404" opacity="0.8"/>
+
+    <polygon points="240,0 480,0 240,128" style="fill:#F0A422" opacity="0.8"/>
+    <polygon points="240,256 480,256 240,128" style="fill:#E90C07" opacity="0.8"/>
+    <polygon points="240,64 420,128 240,192" style="fill:#EC441C" opacity="0.8"/>
+
+    <polygon points="480,0 480,256 720,128" style="fill:#C40404" opacity="0.8"/>
+  </svg>
+</svg>
