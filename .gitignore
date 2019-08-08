@@ -1,0 +1,6 @@
+*.swp
+/target
+**/*.rs.bk
+desc.txt
+red.txt
+syntax.red
