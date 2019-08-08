@@ -1,4 +1,4 @@
-# RED
+# <img src="media/red_logo.png" width="369px" height="136.5px">
 
 A vim-like terminal based text editor written in Rust
 
