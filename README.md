@@ -2,7 +2,7 @@
 
 A vim-like terminal based text editor written in Rust
 
-Extremely early in production. No functinoality whatsoever yet.
+Extremely early in production. No functionality whatsoever yet.
 
 ## Red vs Vim?
 
