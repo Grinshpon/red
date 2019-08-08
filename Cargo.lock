@@ -11,7 +11,7 @@ version = "0.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [[package]]
-name = "red"
+name = "red-it"
 version = "0.1.0"
 dependencies = [
  "termion 1.5.3 (registry+https://github.com/rust-lang/crates.io-index)",
