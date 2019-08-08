@@ -24,25 +24,30 @@ macro_rules! moveCursor {
 
 
 
-fn main() {
+fn main() -> std::io::Result<()> {
   let args: Vec<String> = env::args().collect();
   let file = {
     if args.len() > 1 {
-      open_file(Some(&args[1]))
+      open_file(Some(args[1].clone()))
     }
     else {
       open_file(None)
     }
   };
   match file {
-    Ok(_f) => {
+    Ok(f) => {
       // init(..)
       //...read_file ...
+      //...
+
+      //program finishes
+      fs::remove_file( &Path::new(&format!("{}.swp",f.name)) )?;
     }
     Err(err) => {
       println!("Error opening file: {}", err);
     }
   }
+  Ok(())
 }
 /*
 fn main() {

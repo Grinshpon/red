@@ -4,25 +4,26 @@ use std::io;
 use std::io::{Error, ErrorKind};
 
 pub struct RFile {
-  main: Option<File>, // opening an empty instance will create a swap file but not a main file
-  swap: File
+  pub name: String,
+  pub main: Option<File>, // opening an empty instance will create a swap file but not a main file
+  pub swap: File
 }
 
-pub fn open_file(mfp: Option<&String>) -> io::Result<RFile> {
+pub fn open_file(mfp: Option<String>) -> io::Result<RFile> {
   match mfp {
     Some(fps) => {
-      let fp = Path::new(fps);
+      let fp = Path::new(&fps);
       if fp.is_file() {
         let temp_main = File::open(fp)?;
         let temp_swap = File::create(Path::new( &format!("{}{}",fps,(".swp")) ))?;
-        Ok(RFile{main: Some(temp_main), swap: temp_swap})
+        Ok(RFile{name: fps, main: Some(temp_main), swap: temp_swap})
       }
       else if fp.exists() { // means the entity exists but is not a file
         Err(Error::new(ErrorKind::Other, "Cannot open directory"))
       }
       else { // means we are creating a new file
         let temp = File::create(Path::new( &format!("{}{}",fps,(".swp")) ))?;
-        Ok(RFile{main: None, swap: temp})
+        Ok(RFile{name: fps, main: None, swap: temp})
       }
     },
     None => { // opening an empty swp file
@@ -36,7 +37,7 @@ pub fn open_file(mfp: Option<&String>) -> io::Result<RFile> {
         i += 1;
       }
       let temp = File::create(Path::new(&empty))?;
-      Ok(RFile{main: None, swap: temp})
+      Ok(RFile{name: empty, main: None, swap: temp})
     },
   }
 }
