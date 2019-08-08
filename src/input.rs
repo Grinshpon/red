@@ -5,7 +5,12 @@ use std::io::{Read, Write};
 use std::thread;
 use std::time::Duration;
 
-pub struct Input; //will become command
+use crate::util::*;
+
+pub struct Input { //will become command
+  ch: Char,
+  position: Pos,
+}
 pub type Done = Vec<Input>; //will become "Done" stack
 pub type Undone = Vec<Input>; //will become "Undone" stack
 pub type Comm = Vec<Input>; //will become command mode input stack

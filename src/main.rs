@@ -16,6 +16,8 @@ pub mod input;
 pub mod read;
 use crate::read::*;
 
+pub mod util;
+
 macro_rules! moveCursor {
   ( $scr:expr, $x:expr, $y:expr ) => {{
     write!($scr,"{}",cursor::Goto($x,$y)).unwrap();
