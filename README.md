@@ -1,4 +1,4 @@
-#RED
+# RED
 
 A vim-like terminal based text editor written in Rust
 
