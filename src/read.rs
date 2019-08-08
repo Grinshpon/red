@@ -19,7 +19,7 @@ pub fn open_file(mfp: Option<String>) -> io::Result<RFile> {
         let swap_fps = format!("{}{}",fps,(".swp"));
         let swap_fp = Path::new(&swap_fps);
         if swap_fp.exists() {
-          Err(Error::new(ErrorKind::Other, "Swap file already exists")) //TODO: add existing swap handling
+          Err(Error::new(ErrorKind::Other, "Swap file already exists")) //TODO: add existing-swap handling
         }
         else {
           let temp_swap = File::create(swap_fp)?;
@@ -30,22 +30,19 @@ pub fn open_file(mfp: Option<String>) -> io::Result<RFile> {
       else if fp.exists() { // means the entity exists but is not a file
         Err(Error::new(ErrorKind::Other, "Cannot open directory"))
       }
-      else { // means we are creating a new file
+      else { // means we are creating a new file, main file will be created on first save
         let temp = File::create(Path::new( &format!("{}{}",fps,(".swp")) ))?;
         Ok(RFile{name: fps, main: None, swap: temp})
       }
     },
-    None => { // opening an empty swp file
-      let mut empty = String::from("empty.swp");
+    None => {
+      let mut empty = String::from("newFile");
       let mut i = 0;
-      while (Path::new(&empty).exists()) {
-        empty = {
-          let tmp: Vec<&str> = empty.split(".").collect();
-          format!("{}{}{}{}",tmp[0],i,'.',tmp[1])
-        };
+      while (Path::new(&format!("{}{}",empty,".swp")).exists()) {
+        empty = format!("{}({}){}{}",empty,i,'.',".swp");
         i += 1;
       }
-      let temp = File::create(Path::new(&empty))?;
+      let temp = File::create(Path::new(&format!("{}{}",empty,".swp")))?;
       Ok(RFile{name: empty, main: None, swap: temp})
     },
   }
