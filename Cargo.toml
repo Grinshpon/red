@@ -3,6 +3,7 @@ name = "red-it"
 version = "0.1.0"
 authors = ["grinshpon <grinshpondaniel@protonmail.com>"]
 edition = "2018"
+license = "Zlib"
 
 [dependencies]
 termion = "1.5.3"
