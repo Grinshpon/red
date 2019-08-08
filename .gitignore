@@ -3,4 +3,5 @@
 **/*.rs.bk
 desc.txt
 red.txt
+del.txt
 syntax.red
