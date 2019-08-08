@@ -31,7 +31,7 @@ pub fn open_file(mfp: Option<&String>) -> io::Result<RFile> {
       while (Path::new(&empty).exists()) {
         empty = {
           let tmp: Vec<&str> = empty.split(".").collect();
-          format!("{}{}{}",tmp[0],i,tmp[1])
+          format!("{}{}{}{}",tmp[0],i,'.',tmp[1])
         };
         i += 1;
       }
