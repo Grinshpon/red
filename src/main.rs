@@ -1,5 +1,8 @@
 extern crate termion;
 
+#[macro_use]
+pub mod util;
+
 use termion::*;
 use termion::screen::*;
 
@@ -15,8 +18,6 @@ pub mod input;
 
 pub mod read;
 use crate::read::*;
-
-pub mod util;
 
 macro_rules! moveCursor {
   ( $scr:expr, $x:expr, $y:expr ) => {{
@@ -37,10 +38,11 @@ fn main() -> std::io::Result<()> {
     }
   };
   match file {
-    Ok(f) => {
+    Ok(mut f) => {
       // init(..)
       //...read_file ...
       //...
+      let mut main_win = read_file(&mut f);
 
       //program finishes
       fs::remove_file( &Path::new(&format!("{}.swp",f.name)) )?;
