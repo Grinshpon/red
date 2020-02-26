@@ -41,7 +41,18 @@ impl RopeRoot {
       Some(_) => {
         let mut oldroot = RopeNode {val: 0, left: None, right: None};
         mem::swap(&mut self.root, &mut oldroot);
-        self.root.val = oldroot.val;
+        self.root.val = {
+          let mut length = oldroot.val;
+          let mut current = &oldroot;
+          'lp: loop {
+            match &current.right {
+              Some(Either::Left(s)) => {length += s.len(); break 'lp;},
+              Some(Either::Right(n)) => {current = &n;},
+              None => {break 'lp;}
+            }
+          }
+          length
+        };
         self.root.left = Some(Either::Right(Box::new(oldroot)));
         self.root.right = Some(Either::Right(Box::new(nright.root)));
       },
@@ -56,6 +67,10 @@ impl RopeRoot {
         }
       }
     }
+  }
+
+  fn insert(&mut self, s: CharString) {
+    //
   }
 }
 
