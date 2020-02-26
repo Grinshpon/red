@@ -2,8 +2,8 @@ extern crate termion;
 
 use termion::async_stdin;
 use std::io::{Read, Write};
-use std::thread;
-use std::time::Duration;
+//use std::thread;
+//use std::time::Duration;
 
 use crate::util::*;
 

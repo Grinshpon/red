@@ -71,10 +71,10 @@ pub fn open_file(mfp: Option<String>) -> io::Result<RFile> {
 
 
 pub fn read_file(rfile: &mut RFile) -> View { //try iterator?
-  rfile.swap.seek(SeekFrom::Start(0));
+  void!(rfile.swap.seek(SeekFrom::Start(0)));
   let mut win = View();
-  let mut bufR = BufReader::new(&rfile.swap); //may replace with with_capacity for large files
-  let mut eof = false;
+  let buf_r = BufReader::new(&rfile.swap); //may replace with with_capacity for large files
+  //let mut eof = false;
   let mut line_num = 0;
 /*
   while !eof {
@@ -93,7 +93,7 @@ pub fn read_file(rfile: &mut RFile) -> View { //try iterator?
   }
 */
 
-  for mline in bufR.lines() {
+  for mline in buf_r.lines() {
     match mline {
       Ok(line) => {
         win.contents.push(line);

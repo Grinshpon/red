@@ -3,8 +3,8 @@ extern crate termion;
 #[macro_use]
 pub mod util;
 
-use termion::*;
-use termion::screen::*;
+//use termion::*;
+//use termion::screen::*;
 
 use std::io::{Write, stdout, stdin};
 use std::env;
@@ -19,13 +19,14 @@ pub mod input;
 pub mod read;
 use crate::read::*;
 
-macro_rules! moveCursor {
-  ( $scr:expr, $x:expr, $y:expr ) => {{
-    write!($scr,"{}",cursor::Goto($x,$y)).unwrap();
-  }}
-}
+pub mod buffer;
+use crate::buffer::*;
 
+pub mod charstring;
+use crate::charstring::*;
 
+pub mod rope;
+use crate::rope::*;
 
 fn main() -> std::io::Result<()> {
   let args: Vec<String> = env::args().collect();
@@ -74,7 +75,7 @@ fn main() {
     .expect("Can not get terminal size");
   {
     let mut screen = AlternateScreen::from(stdout());
-    moveCursor!(screen, 1,1);
+    setCursor!(screen, 1,1);
     match file {
       Some(content) => {write!(screen, "{}", content).unwrap();},
       _ => {},

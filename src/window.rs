@@ -39,13 +39,15 @@ pub use tabs::TabBar;
 
 use crate::util::Pos;
 
-pub type Contents = Vec<String>;
-
-/*
-pub type Line = String; // or Vec<Word> where Word = String
+pub enum Unit {
+  Word(String),
+  Space(String),
+}
+pub type Line = Vec<Unit>; // or string
 pub type Paragraph = Vec<Line>;
-pub type Contents = Vec<Paragraph>;
-*/
+pub type Contents = Vec<String>; //temporary
+//pub type Contents = Vec<Paragraph>;
+
 // this should be turned into a rope type structure.
 /*
   idea:
@@ -74,6 +76,7 @@ pub struct View {
   pub cursor: Pos,
   pub contents: Contents,
 }
+#[allow(non_snake_case)]
 pub fn View() -> View {
   View {
     x: 0,
