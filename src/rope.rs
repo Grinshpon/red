@@ -1,3 +1,4 @@
+use std::fmt;
 use std::mem;
 use crate::charstring::*;
 
@@ -24,6 +25,20 @@ impl RopeNode {
       right: None
     }
   }
+
+  fn show(&self) -> String {
+    let mut s: String = match &self.left {
+      Some(Either::Left(st)) => st.show(),
+      Some(Either::Right(t)) => t.show(),
+      None => String::new()
+    };
+    s.push_str(&(match &self.right {
+      Some(Either::Left(st)) => st.show(),
+      Some(Either::Right(t)) => t.show(),
+      None => String::new()
+    }));
+    s
+  }
 }
 
 #[derive(Debug)]
@@ -36,7 +51,7 @@ impl RopeRoot {
     RopeRoot {root: RopeNode::from(cstr)}
   }
 
-  fn append(&mut self, nright: RopeRoot) {
+  fn concat(&mut self, nright: RopeRoot) {
     match self.root.right {
       Some(_) => {
         let mut oldroot = RopeNode {val: 0, left: None, right: None};
@@ -47,7 +62,7 @@ impl RopeRoot {
           'lp: loop {
             match &current.right {
               Some(Either::Left(s)) => {length += s.len(); break 'lp;},
-              Some(Either::Right(n)) => {current = &n;},
+              Some(Either::Right(n)) => {length += n.val; current = &n;},
               None => {break 'lp;}
             }
           }
@@ -68,16 +83,62 @@ impl RopeRoot {
       }
     }
   }
+}
 
-  fn insert(&mut self, s: CharString) {
-    //
-  }
+impl fmt::Display for RopeRoot {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.root.show())
+    }
 }
 
 #[derive(Debug)]
 pub struct Rope {
   rope: RopeRoot,
   len: usize
+}
+
+impl Rope {
+  pub fn single(cstr: CharString) -> Rope {
+    let rp = RopeRoot {root: RopeNode::from(cstr)};
+    let len = rp.root.val;
+    Rope{rope: rp, len: len}
+  }
+
+  pub fn from(s: CharString) -> Rope {
+    let mut ixs: Vec<usize> = vec![];
+    for i in 1..(s.len()) { //if first elem(0) is whitespace then it will be part of first word
+      if !s[i].is_alphanumeric() {
+        ixs.push(i);
+      }
+    }
+    if ixs.len() == 0 {
+      Rope::single(s)
+    }
+    else {
+      let (left, _) = s.val.split_at(ixs[0]);
+      let mut res = Rope::single(CharString(left.to_vec()));
+      for i in 1..ixs.len() {
+        let (_,r) = s.val.split_at(ixs[i-1]);
+        let (ns, _r) = r.split_at(ixs[i]-ixs[i-1]);
+        res.concat(Rope::single(CharString(ns.to_vec()))); //replace with Rope::insert
+        if i == ixs.len()-1 {
+          res.concat(Rope::single(CharString(_r.to_vec())));
+        }
+      }
+      res
+    }
+  }
+
+  pub fn concat(&mut self, node: Rope) {
+    self.len += node.len;
+    self.rope.concat(node.rope);
+  }
+}
+
+impl fmt::Display for Rope {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        self.rope.fmt(f)
+    }
 }
 
 /*

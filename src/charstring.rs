@@ -14,6 +14,13 @@ impl CharString {
   pub fn len(&self) -> usize {
     self.val.len()
   }
+  pub fn show(&self) -> String {
+    self.val.iter().collect()
+  }
+
+  pub fn from(s: &str) -> CharString {
+    CharString(s.chars().collect())
+  }
 }
 
 impl fmt::Display for CharString {
