@@ -1,6 +1,6 @@
 [package]
 name = "red-it"
-version = "0.1.1"
+version = "0.1.2"
 authors = ["grinshpon <grinshpondaniel@protonmail.com>"]
 edition = "2018"
 license = "Zlib"
@@ -19,4 +19,4 @@ include = [
 ]
 
 [dependencies]
-termion = "1.5.3"
+termion = "^1.5.5"

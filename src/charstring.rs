@@ -21,6 +21,14 @@ impl CharString {
   pub fn from(s: &str) -> CharString {
     CharString(s.chars().collect())
   }
+
+  pub fn empty() -> CharString {
+    CharString{val: vec![]}
+  }
+
+  pub fn insert(&mut self, i: usize, c: char) {
+    self.val.insert(i, c);
+  }
 }
 
 impl fmt::Display for CharString {
