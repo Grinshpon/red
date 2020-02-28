@@ -72,24 +72,13 @@ impl RopeNode {
       None => {*target = Some(Node::Leaf(st));}
     }
   }
-}
 
-#[derive(Debug)]
-struct RopeRoot {
-  root: RopeNode,
-}
-
-impl RopeRoot {
-  fn from(cstr: CharString) -> RopeRoot {
-    RopeRoot {root: RopeNode::from(cstr)}
-  }
-
-  fn concat(&mut self, nright: RopeRoot) {
-    match self.root.right {
+  fn concat(&mut self, nright: RopeNode) {
+    match self.right {
       Some(_) => {
         let mut oldroot = RopeNode {val: 0, left: None, right: None};
-        mem::swap(&mut self.root, &mut oldroot);
-        self.root.val = {
+        mem::swap(self, &mut oldroot);
+        self.val = {
           let mut length = oldroot.val;
           let mut current = &oldroot;
           'lp: loop {
@@ -101,42 +90,39 @@ impl RopeRoot {
           }
           length
         };
-        self.root.left = Some(Node::Branch(Box::new(oldroot)));
-        self.root.right = Some(Node::Branch(Box::new(nright.root)));
+        self.left = Some(Node::Branch(Box::new(oldroot)));
+        self.right = Some(Node::Branch(Box::new(nright)));
       },
       None => {
-        match nright.root.right {
+        match nright.right {
           Some(_) => {
-            self.root.right = Some(Node::Branch(Box::new(nright.root)));
+            self.right = Some(Node::Branch(Box::new(nright)));
           },
           None => {
-            self.root.right = nright.root.left;
+            self.right = nright.left;
           }
         }
       }
     }
   }
-  pub fn insert_whole(&mut self, place: usize, s: CharString) {
-    self.root.insert_whole(place, s);
-  }
 }
 
-impl fmt::Display for RopeRoot {
+impl fmt::Display for RopeNode {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", self.root.show())
+        write!(f, "{}", self.show())
     }
 }
 
 #[derive(Debug)]
 pub struct Rope {
   len: usize,
-  rope: RopeRoot
+  rope: RopeNode
 }
 
 impl Rope {
   pub fn single(cstr: CharString) -> Rope {
-    let rp = RopeRoot {root: RopeNode::from(cstr)};
-    let len = rp.root.val;
+    let rp = RopeNode::from(cstr);
+    let len = rp.val;
     Rope{len: len, rope: rp}
   }
 
