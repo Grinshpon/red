@@ -55,7 +55,11 @@ fn main() -> std::io::Result<()> {
       let stdin = stdin();
       //let size = terminal_size()
       //  .expect("Cannot get terminal size");
-      write!(main_buffer.context, "{}\n\nPress enter: ", main_buffer.buffer).unwrap();
+      //write!(main_buffer.context, "{}\r\n\r\nPress enter: ", main_buffer.buffer).unwrap();
+      for line in main_buffer.buffer.lines() {
+        write!(main_buffer.context, "{}\r", line).unwrap();
+      }
+      write!(main_buffer.context, "\r\n\r\nPress enter: ").unwrap();
       main_buffer.context.flush().unwrap();
       for key in stdin.keys() {
         match key.unwrap() {
