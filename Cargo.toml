@@ -20,3 +20,4 @@ include = [
 
 [dependencies]
 termion = "^1.5.5"
+ropey = "^1.1.0"

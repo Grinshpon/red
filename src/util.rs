@@ -14,12 +14,3 @@ macro_rules! get {
     $map.get_mut($key).unwrap()
   )}
 }
-
-#[macro_export]
-macro_rules! setCursor {
-  ( $scr:expr, $x:expr, $y:expr ) => {{
-    write!($scr,"{}",cursor::Goto($x,$y)).unwrap();
-  }}
-}
-
-

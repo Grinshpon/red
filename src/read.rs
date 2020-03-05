@@ -1,3 +1,10 @@
+use ropey::Rope;
+
+use termion::screen::*;
+use termion::cursor::*;
+use termion::raw::RawTerminal;
+
+
 use std::fs;
 use std::fs::File;
 use std::path::Path;
@@ -5,18 +12,21 @@ use std::io;
 use std::io::{Error, ErrorKind};
 use std::io::{BufRead, BufReader};
 use std::io::{Seek, SeekFrom};
+use std::io::{Write, Stdout, stdin};
 
 use crate::window::*;
-
 use crate::util::*;
+use crate::buffer::*;
 
+/*
 pub struct RFile {
   pub name: String,
-  pub main: Option<File>, // opening an empty instance will create a swap file but not a main file
-  pub swap: File
+  pub main: Option<File>, // opening an empty instance will create a diff file but not a main file
+  pub diff: File
 }
+*/
 
-pub fn open_file(mfp: Option<String>) -> io::Result<RFile> {
+pub fn open_file(mfp: Option<String>) -> io::Result<(String, Option<File>, File)> {
   match mfp {
     Some(fps) => {
       let fp = Path::new(&fps);
@@ -25,19 +35,19 @@ pub fn open_file(mfp: Option<String>) -> io::Result<RFile> {
           .read(true)
           .write(true)
           .open(fp)?;
-        let swap_fps = format!("{}{}",fps,(".swp"));
-        let swap_fp = Path::new(&swap_fps);
-        if swap_fp.exists() {
-          Err(Error::new(ErrorKind::Other, "Swap file already exists")) //TODO: add existing-swap handling
+        let diff_fps = format!("{}{}",fps,(".diff"));
+        let diff_fp = Path::new(&diff_fps);
+        if diff_fp.exists() {
+          Err(Error::new(ErrorKind::Other, "Diff file already exists")) //TODO: add existing-diff handling
         }
         else {
-          let temp_swap = fs::OpenOptions::new()
+          let temp_diff = fs::OpenOptions::new()
             .read(true)
             .write(true)
             .create(true)
-            .open(swap_fp)?;
-          fs::copy(fp, swap_fp)?;
-          Ok(RFile{name: fps, main: Some(temp_main), swap: temp_swap})
+            .open(diff_fp)?;
+          //fs::copy(fp, diff_fp)?;
+          Ok((fps, Some(temp_main), temp_diff))
         }
       }
       else if fp.exists() { // means the entity exists but is not a file
@@ -48,62 +58,44 @@ pub fn open_file(mfp: Option<String>) -> io::Result<RFile> {
           .read(true)
           .write(true)
           .create(true)
-          .open(Path::new( &format!("{}{}",fps,(".swp")) ))?;
-        Ok(RFile{name: fps, main: None, swap: temp})
+          .open(Path::new( &format!("{}{}",fps,(".diff")) ))?;
+        Ok((fps, None, temp))
       }
     },
     None => {
       let mut empty = String::from("newFile");
       let mut i = 0;
-      while (Path::new(&format!("{}{}",empty,".swp")).exists()) {
-        empty = format!("{}({}){}{}",empty,i,'.',".swp");
+      while (Path::new(&format!("{}{}",empty,".diff")).exists()) {
+        empty = format!("{}({}){}{}",empty,i,'.',".diff");
         i += 1;
       }
       let temp = fs::OpenOptions::new()
         .read(true)
         .write(true)
         .create(true)
-        .open(Path::new(&format!("{}{}",empty,".swp")))?;
-      Ok(RFile{name: empty, main: None, swap: temp})
+        .open(Path::new(&format!("{}{}",empty,".diff")))?;
+      Ok((empty, None, temp))
     },
   }
 }
 
 
-pub fn read_file(rfile: &mut RFile) -> View { //try iterator?
-  void!(rfile.swap.seek(SeekFrom::Start(0)));
-  let mut win = View();
-  let buf_r = BufReader::new(&rfile.swap); //may replace with with_capacity for large files
-  //let mut eof = false;
-  let mut line_num = 0;
-/*
-  while !eof {
-    win.contents.push({
-      let mut tmp = vec![];
-      bufR.read_until(b'\n', &mut tmp); //will handle result later
-      tmp
-    });
-    if win.contents[line_num].is_empty() {
-      eof = true;
-      //void!(win.contents.pop());
-    }
-    else {
-      line_num += 1;
-    }
-  }
-*/
-
-  for mline in buf_r.lines() {
-    match mline {
-      Ok(line) => {
-        win.contents.push(line);
-        //temporary
-        println!("{}",win.contents[line_num]);
-        line_num += 1;
-      },
-      Err(_) => {}, //todo: add error handling
-    }
-  }
-
-  win
+pub fn read_file(name: String, mfile: Option<File>, mut diff: File, context: Box<AlternateScreen<RawTerminal<Stdout>>>) -> io::Result<Buffer> {
+  void!(diff.seek(SeekFrom::Start(0)));
+  //let mut win = View();
+  let mut buffer = match &mfile {
+    Some(file) => Rope::from_reader(
+      BufReader::new(file)
+    )?,
+    None => Rope::new(),
+  };
+  Ok(Buffer {
+    name: name,
+    file: mfile,
+    diff: diff,
+    buffer: buffer,
+    cursor: (1,1),
+    selection: None,
+    context: context,
+  })
 }

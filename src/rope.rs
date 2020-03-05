@@ -66,7 +66,6 @@ impl RopeNode {
           mem::swap(&mut tmp, s);
           let nrope = RopeNode {val: tmp.len(), left: Some(Node::Leaf(tmp)), right: Some(Node::Leaf(st))};
           *target = Some(Node::Branch(Box::new(nrope)));
-          //*target = Some(Node::Branch(Box::new(RopeNode {val: s.len(), left: Some(Node::Leaf(s)), right: Some(Node::Leaf(st))})));
         }
       },
       None => {*target = Some(Node::Leaf(st));}
@@ -137,10 +136,10 @@ impl Rope {
       Rope::single(s)
     }
     else {
-      let (left, _) = s.val.split_at(ixs[0]);
+      let (left, _) = s.0.split_at(ixs[0]);
       let mut res = Rope::single(CharString(left.to_vec()));
       for i in 1..ixs.len() {
-        let (_,r) = s.val.split_at(ixs[i-1]);
+        let (_,r) = s.0.split_at(ixs[i-1]);
         let (ns, _r) = r.split_at(ixs[i]-ixs[i-1]);
         res.concat(Rope::single(CharString(ns.to_vec()))); //replace with Rope::insert_whole
         if i == ixs.len()-1 {
@@ -169,10 +168,10 @@ impl Rope {
       }
     }
     if ixs.len() == 0 {
-      //
+      // TODO
     }
     else {
-      //
+      // TODO
     }
   }
 

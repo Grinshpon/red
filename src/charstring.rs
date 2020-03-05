@@ -2,20 +2,14 @@ use std::fmt;
 use std::ops::{Index,IndexMut};
 
 #[derive(Debug)]
-pub struct CharString {
-    pub val: Vec<char>,
-}
-#[allow(non_snake_case)]
-pub fn CharString (s: Vec<char>) -> CharString {
-    CharString{val: s}
-}
+pub struct CharString(pub Vec<char>);
 
 impl CharString {
   pub fn len(&self) -> usize {
-    self.val.len()
+    self.0.len()
   }
   pub fn show(&self) -> String {
-    self.val.iter().collect()
+    self.0.iter().collect()
   }
 
   pub fn from(s: &str) -> CharString {
@@ -23,17 +17,17 @@ impl CharString {
   }
 
   pub fn empty() -> CharString {
-    CharString{val: vec![]}
+    CharString{0: vec![]}
   }
 
   pub fn insert(&mut self, i: usize, c: char) {
-    self.val.insert(i, c);
+    self.0.insert(i, c);
   }
 }
 
 impl fmt::Display for CharString {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let s: String = self.val.iter().collect();
+        let s: String = self.0.iter().collect();
         write!(f, "{}", s)
     }
 }
@@ -42,12 +36,12 @@ impl Index<usize> for CharString {
     type Output = char;
 
     fn index(&self, index: usize) -> &Self::Output {
-        &self.val[index]
+        &self.0[index]
     }
 }
 
 impl IndexMut<usize> for CharString {
     fn index_mut(&mut self, index: usize) -> &mut Self::Output {
-        &mut self.val[index]
+        &mut self.0[index]
     }
 }

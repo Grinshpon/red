@@ -1,10 +1,14 @@
-extern crate termion;
 
 #[macro_use]
 pub mod util;
 
-//use termion::*;
-//use termion::screen::*;
+extern crate termion;
+use termion::cursor;
+use termion::screen::*;
+use termion::event::Key;
+use termion::input::TermRead;
+use termion::raw::IntoRawMode;
+use termion::*;
 
 use std::io::{Write, stdout, stdin};
 use std::env;
@@ -12,7 +16,7 @@ use std::fs;
 use std::path::Path;
 
 pub mod window;
-use crate::window::*;
+//use crate::window::*;
 
 pub mod input;
 
@@ -23,10 +27,10 @@ pub mod buffer;
 use crate::buffer::*;
 
 pub mod charstring;
-use crate::charstring::*;
+//use crate::charstring::*;
 
 pub mod rope;
-use crate::rope::*;
+//use crate::rope::*;
 
 fn main() -> std::io::Result<()> {
   let args: Vec<String> = env::args().collect();
@@ -39,14 +43,32 @@ fn main() -> std::io::Result<()> {
     }
   };
   match file {
-    Ok(mut f) => {
+    Ok((name, mut f, mut df)) => {
       // init(..)
       //...read_file ...
       //...
-      let mut main_win = read_file(&mut f);
+      let mut screen = Box::new(AlternateScreen::from(stdout().into_raw_mode().unwrap()));
+      //write!(screen,"{}",cursor::Goto(1,1)).unwrap();
+      let mut main_buffer = read_file(name.clone(), f, df, screen)?;
+      main_buffer.set_cursor(1,1);
+
+      let stdin = stdin();
+      //let size = terminal_size()
+      //  .expect("Cannot get terminal size");
+      write!(main_buffer.context, "{}\n\nPress enter: ", main_buffer.buffer).unwrap();
+      main_buffer.context.flush().unwrap();
+      for key in stdin.keys() {
+        match key.unwrap() {
+          Key::Char('\n') => break,
+          Key::Char('q') => break,
+          Key::Ctrl('c') => {},
+          _ => {},
+        }
+      }
+
 
       //program finishes
-      fs::remove_file( &Path::new(&format!("{}.swp",f.name)) )?;
+      fs::remove_file( &Path::new(&format!("{}.diff", name)) )?;
     }
     Err(err) => {
       println!("Error opening file: {}", err);
@@ -54,38 +76,3 @@ fn main() -> std::io::Result<()> {
   }
   Ok(())
 }
-/*
-fn main() {
-  let args: Vec<String> = env::args().collect();
-  let file = {
-    if args.len() > 1 {
-      let fpath = Path::new(&args[1]);
-      match fs::read_to_string(fpath) {
-        Ok(f) => Some(f),
-        Err(err) => {
-          println!("Could not read file: {}", err);
-          None
-        },
-      }
-    } else {None}
-  };
-  let _deletedis = Bar::new();
-  let mut input = String::new();
-  let size = terminal_size()
-    .expect("Can not get terminal size");
-  {
-    let mut screen = AlternateScreen::from(stdout());
-    setCursor!(screen, 1,1);
-    match file {
-      Some(content) => {write!(screen, "{}", content).unwrap();},
-      _ => {},
-    }
-    write!(screen, "Screen size: {:?}\n\nWrite something and press enter: ", size).unwrap();
-    screen.flush().unwrap();
-    stdin().read_line(&mut input)
-      .expect("Could not read input");
-  }
-
-  println!("{}",input);
-}
-*/
