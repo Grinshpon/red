@@ -33,12 +33,6 @@ use termion::*;
 pub mod bottom_bar;
 pub use bottom_bar::Bar;
 
-pub mod line_num;
-pub use line_num::LineN;
-
-//pub mod tabs;
-//pub use tabs::TabBar;
-
 use crate::util::*;
 use crate::buffer::*;
 
@@ -75,14 +69,14 @@ impl Window {
       offset: offset,
       scroll: 1,
       width: width,
-      height: height,
+      height: height-2, // 2 rows on bottom reserved for command bar
     }
   }
 
   pub fn display(&mut self) {
     self.buffer.set_cursor(1,1);
     let mut ln = self.scroll;
-    for line in self.buffer.content.lines() {
+    for line in self.buffer.content.lines_at(self.scroll-1) { //what's confusing is termion stuff is 1-indexed but ropey stuff is 0-indexed. plus termion uses u16 for sizes and ropey uses usize.
       if ln < self.lines {
         write!(self.buffer.context, "{}{} ", color::Fg(color::Yellow), line_num(ln, self.offset)).unwrap();
         write!(self.buffer.context, "{}{}\r", color::Fg(color::Reset), line).unwrap();
