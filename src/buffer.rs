@@ -25,16 +25,16 @@ pub struct Buffer {
 }
 
 impl Buffer {
-  pub fn set_cursor(&mut self, x: u16, y: u16) {
-    set_cursor(&mut *(self.context), x, y);
+  pub fn set_cursor(&mut self, x: u16, y: u16, offset: u16) {
+    set_cursor(&mut *(self.context), x+offset, y);
     self.cursor = (x,y);
   }
 
-  pub fn move_cursor(&mut self, x: u16, y: u16) {
+  pub fn move_cursor(&mut self, x: u16, y: u16, offset: u16) {
     let (mut nx, mut ny) = self.cursor;
     nx += x;
     ny += y;
-    set_cursor(&mut *(self.context), nx, ny);
+    set_cursor(&mut *(self.context), nx+offset, ny);
     self.cursor = (nx,ny);
   }
 

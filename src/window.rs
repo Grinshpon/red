@@ -29,20 +29,29 @@
 use termion::{color, style};
 use termion::*;
 
-
-pub mod bottom_bar;
-pub use bottom_bar::Bar;
-
 use crate::util::*;
 use crate::buffer::*;
 
 use std::io::Write;
+use std::fmt::*;
 
+#[derive(Debug)]
 pub enum Mode {
-  Normal,
   Command,
   Insert,
-  Select,
+  Visual,
+  VisualBlock,
+}
+impl Display for Mode {
+  fn fmt(&self, f: &mut Formatter<'_>) -> Result {
+    let s = match self {
+      Mode::Command => "",
+      Mode::Insert => "-- INSERT --",
+      Mode::Visual => "-- VISUAL --",
+      Mode::VisualBlock => "-- VISUAL BLOCK --",
+    };
+    write!(f, "{}", s)
+  }
 }
 
 pub struct Window {
@@ -61,7 +70,7 @@ impl Window {
       .expect("Could not get terminal size");
     let lines = buffer.content.len_lines();
     let offset = lines.len_digits();
-    buffer.set_cursor(offset, 1);
+    buffer.set_cursor(1, 1, offset);
     Window {
       buffer: buffer,
       mode: Mode::Command,
@@ -69,21 +78,24 @@ impl Window {
       offset: offset,
       scroll: 1,
       width: width,
-      height: height-2, // 2 rows on bottom reserved for command bar
+      height: height-1, // 2 rows on bottom reserved for command bar
     }
   }
 
   pub fn display(&mut self) {
-    self.buffer.set_cursor(1,1);
+    self.buffer.set_cursor(1,1,0);
     let mut ln = self.scroll;
     for line in self.buffer.content.lines_at(self.scroll-1) { //what's confusing is termion stuff is 1-indexed but ropey stuff is 0-indexed. plus termion uses u16 for sizes and ropey uses usize.
-      if ln < self.lines {
+      if ln < self.lines && ln < self.scroll + (self.height as usize) {
         write!(self.buffer.context, "{}{} ", color::Fg(color::Yellow), line_num(ln, self.offset)).unwrap();
         write!(self.buffer.context, "{}{}\r", color::Fg(color::Reset), line).unwrap();
         ln += 1;
       }
     }
-    self.buffer.set_cursor(2+self.offset+self.buffer.cursor.0,self.buffer.cursor.1);
+    self.buffer.set_cursor(1,self.height+1,0);
+    write!(self.buffer.context, "{}", self.mode).unwrap();
+    // display position of cursor and scroll percantage/top/bot on right side of bottom bar
+    self.buffer.set_cursor(1, 1, self.offset+1);
     self.buffer.context.flush().unwrap();
   }
 }
