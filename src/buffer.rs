@@ -17,7 +17,7 @@ pub struct Buffer {
   pub name: String,
   pub file: Option<File>,
   pub diff: File,
-  pub buffer: Rope,
+  pub content: Rope,
   pub cursor: Pos,
   pub selection: Option<Vec<(usize,u16,u16)>>, // vector of 3-tuples representing line, start, end. (for Ctrl-V behavior)
   //pub registers: ??,

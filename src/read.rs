@@ -93,7 +93,7 @@ pub fn read_file(name: String, mfile: Option<File>, mut diff: File, context: Box
     name: name,
     file: mfile,
     diff: diff,
-    buffer: buffer,
+    content: buffer,
     cursor: (1,1),
     selection: None,
     context: context,

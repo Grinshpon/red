@@ -26,7 +26,9 @@
 //  |command/info/mode bar                                     (cursor position)  |
 //  +-----------------------------------------------------------------------------+
 
-//pub mod util;
+use termion::{color, style};
+use termion::*;
+
 
 pub mod bottom_bar;
 pub use bottom_bar::Bar;
@@ -34,54 +36,69 @@ pub use bottom_bar::Bar;
 pub mod line_num;
 pub use line_num::LineN;
 
-pub mod tabs;
-pub use tabs::TabBar;
+//pub mod tabs;
+//pub use tabs::TabBar;
 
-use crate::util::Pos;
+use crate::util::*;
+use crate::buffer::*;
 
-pub enum Unit {
-  Word(String),
-  Space(String),
-}
-pub type Line = Vec<Unit>; // or string
-pub type Paragraph = Vec<Line>;
-pub type Contents = Vec<String>; //temporary
-//pub type Contents = Vec<Paragraph>;
+use std::io::Write;
 
-// this should be turned into a rope type structure.
-/*
-  idea:
-    content
-    |- paragraphs
-       |- lines
-          |- words?
-*/
-
-/*
-impl <String>Display for Vec<String> {
-  fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-    f
-*/
-
-enum Mode {
+pub enum Mode {
   Normal,
   Command,
   Insert,
   Select,
 }
 
-pub struct View {
-  pub x: u16,
-  pub y: u16,
-  pub cursor: Pos,
-  pub contents: Contents,
+pub struct Window {
+  pub buffer: Buffer,
+  pub mode: Mode,
+  pub lines: usize,
+  pub offset: u16,
+  pub scroll: usize,
+  pub width:  u16,
+  pub height: u16,
 }
-#[allow(non_snake_case)]
-pub fn View() -> View {
-  View {
-    x: 0,
-    y: 0,
-    cursor: (0,0),
-    contents: Vec::new(),
+
+impl Window {
+  pub fn from(mut buffer: Buffer) -> Window {
+    let (width, height) = terminal_size()
+      .expect("Could not get terminal size");
+    let lines = buffer.content.len_lines();
+    let offset = lines.len_digits();
+    buffer.set_cursor(offset, 1);
+    Window {
+      buffer: buffer,
+      mode: Mode::Command,
+      lines: lines,
+      offset: offset,
+      scroll: 1,
+      width: width,
+      height: height,
+    }
   }
+
+  pub fn display(&mut self) {
+    self.buffer.set_cursor(1,1);
+    let mut ln = self.scroll;
+    for line in self.buffer.content.lines() {
+      if ln < self.lines {
+        write!(self.buffer.context, "{}{} ", color::Fg(color::Yellow), line_num(ln, self.offset)).unwrap();
+        write!(self.buffer.context, "{}{}\r", color::Fg(color::Reset), line).unwrap();
+        ln += 1;
+      }
+    }
+    self.buffer.set_cursor(2+self.offset+self.buffer.cursor.0,self.buffer.cursor.1);
+    self.buffer.context.flush().unwrap();
+  }
+}
+
+fn line_num(ln: usize, offset: u16) -> String {
+  let ld = ln.len_digits();
+  let mut s = String::new();
+  for _ in 0..(offset-ld) {
+    s.push(' ');
+  }
+  format!("{}{}",s,ln)
 }

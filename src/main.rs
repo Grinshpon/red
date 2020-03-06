@@ -16,7 +16,7 @@ use std::fs;
 use std::path::Path;
 
 pub mod window;
-//use crate::window::*;
+use crate::window::*;
 
 pub mod input;
 
@@ -49,18 +49,13 @@ fn main() -> std::io::Result<()> {
       //...
       let mut screen = Box::new(AlternateScreen::from(stdout().into_raw_mode().unwrap()));
       //write!(screen,"{}",cursor::Goto(1,1)).unwrap();
-      let mut main_buffer = read_file(name.clone(), f, df, screen)?;
-      main_buffer.set_cursor(1,1);
+      let mut buffer = read_file(name.clone(), f, df, screen)?;
+
+      let mut window = Window::from(buffer);
+      window.display();
 
       let stdin = stdin();
-      //let size = terminal_size()
-      //  .expect("Cannot get terminal size");
-      //write!(main_buffer.context, "{}\r\n\r\nPress enter: ", main_buffer.buffer).unwrap();
-      for line in main_buffer.buffer.lines() {
-        write!(main_buffer.context, "{}\r", line).unwrap();
-      }
-      write!(main_buffer.context, "\r\n\r\nPress enter: ").unwrap();
-      main_buffer.context.flush().unwrap();
+
       for key in stdin.keys() {
         match key.unwrap() {
           Key::Char('\n') => break,
