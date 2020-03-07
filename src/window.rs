@@ -41,6 +41,7 @@ pub enum Mode {
   Insert,
   Visual,
   VisualBlock,
+  Replace,
 }
 impl Display for Mode {
   fn fmt(&self, f: &mut Formatter<'_>) -> Result {
@@ -49,6 +50,7 @@ impl Display for Mode {
       Mode::Insert => "-- INSERT --",
       Mode::Visual => "-- VISUAL --",
       Mode::VisualBlock => "-- VISUAL BLOCK --",
+      Mode::Replace => "-- REPLACE --",
     };
     write!(f, "{}", s)
   }
@@ -82,7 +84,12 @@ impl Window {
     }
   }
 
-  pub fn display(&mut self) {
+  pub fn clear(&mut self) { //todo: add optional range parameter
+    write!(self.buffer.context, "{}", clear::All);
+  }
+
+  pub fn display(&mut self) { //todo: add optional range parameter
+    let (x,y) = self.buffer.cursor;
     self.buffer.set_cursor(1,1,0);
     let mut ln = self.scroll;
     for line in self.buffer.content.lines_at(self.scroll-1) { //what's confusing is termion stuff is 1-indexed but ropey stuff is 0-indexed. plus termion uses u16 for sizes and ropey uses usize.
@@ -93,9 +100,9 @@ impl Window {
       }
     }
     self.buffer.set_cursor(1,self.height+1,0);
-    write!(self.buffer.context, "{}", self.mode).unwrap();
+    write!(self.buffer.context, "{}{}{}", style::Bold, self.mode, style::Reset).unwrap();
     // display position of cursor and scroll percantage/top/bot on right side of bottom bar
-    self.buffer.set_cursor(1, 1, self.offset+1);
+    self.buffer.set_cursor(x, y, self.offset+1);
     self.buffer.context.flush().unwrap();
   }
 }

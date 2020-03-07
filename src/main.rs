@@ -19,6 +19,7 @@ pub mod window;
 use crate::window::*;
 
 pub mod input;
+use crate::input::*;
 
 pub mod read;
 use crate::read::*;
@@ -56,12 +57,14 @@ fn main() -> std::io::Result<()> {
 
       let stdin = stdin();
 
+      let mut keymap = KeyMap::default(); // eventually should read an rc file to change keymap appropriately
+
       for key in stdin.keys() {
-        match key.unwrap() {
-          Key::Char('\n') => break,
-          Key::Char('q') => break,
-          Key::Ctrl('c') => {},
-          _ => {},
+        if perform_action(&keymap, &mut window, &key.unwrap()) {
+          break;
+        }
+        else {
+          window.buffer.context.flush().unwrap();
         }
       }
 
@@ -73,5 +76,6 @@ fn main() -> std::io::Result<()> {
       println!("Error opening file: {}", err);
     }
   }
+  //println!("finished");
   Ok(())
 }

@@ -1,20 +1,30 @@
 extern crate termion;
+use termion::event::Key;
 
-use termion::async_stdin;
-use std::io::{Read, Write};
-//use std::thread;
-//use std::time::Duration;
+//use std::io::{Read, Write};
+use std::collections::HashMap;
+
+macro_rules! hashmap {
+  ( $( $key: expr => $val:expr ),* ) => {{
+    let mut temp = HashMap::new();
+    $(
+      temp.insert($key,$val);
+    )*
+    temp
+  }}
+}
 
 use crate::util::*;
+use crate::window::*;
 
 pub struct Input { //will become command
-  ch: Char,
+  key: Key,
   position: Pos,
 }
-pub type Action = Vec<Input>;
-pub type Done = Vec<Action>; //will become "Done" stack
-pub type Undone = Vec<Action>; //will become "Undone" stack
-pub type Comm = Vec<Action>; //will become command mode input stack
+//pub type Action = Vec<Input>;
+//pub type Done = Vec<Action>; //will become "Done" stack
+//pub type Undone = Vec<Action>; //will become "Undone" stack
+//pub type Comm = Vec<Action>; //will become command mode input stack
 
 /*
 Basicallly how this works:
@@ -30,9 +40,71 @@ Basicallly how this works:
   from the "undone" stack and pushed back onto the "done" stack.
 */
 
-pub fn input_handler(scr: &mut dyn Write, ) {
-    let mut stdin = async_stdin().bytes();
-    let mut last_input = String::new();
+#[derive(Debug,Clone,Copy)]
+pub enum Action {
+  Insert,
+  Visual,
+  Delete,
+  VisualBlock,
+  Replace,
+  ExitMode,
+  Word,
+  Up,
+  Down,
+  Left,
+  Right,
+  Undo,
+  Redo,
+  Write,
+  Quit,
+  ModNum(u16),
+}
 
-    // create input channel and run in separate thread
+pub type ActionChain = Vec<Action>; //concept? So "d3w" becomes [Delete, ModNum(3), Word]
+
+pub struct KeyMap(HashMap<Key,Action>);
+
+impl KeyMap {
+  pub fn default() -> KeyMap {
+    KeyMap(hashmap! {
+      Key::Char('\n') => Action::Quit, //PLACEHOLDER
+//    Key::Char('h') => Action::Left,
+//    Key::Char('l') => Action::Right,
+//    Key::Char('k') => Action::Up,
+//    Key::Char('j') => Action::Down,
+      Key::Left      => Action::Left,
+      Key::Right     => Action::Right,
+      Key::Up        => Action::Up,
+      Key::Down      => Action::Down,
+      Key::Esc       => Action::ExitMode,
+      Key::Char('i') => Action::Insert,
+      Key::Char('v') => Action::Visual
+    })
+  }
+}
+
+pub fn perform_action(keymap: &KeyMap, window: &mut Window, key: &Key) -> bool {
+  let mut quit = false;
+  match keymap.0.get(key) {
+    None => { },
+    Some(action) => match action {
+      Action::Quit => { quit = true; },
+      Action::ExitMode => { window.mode = Mode::Command; window.clear(); window.display(); },
+      Action::Insert => { window.mode = Mode::Insert; window.display(); },
+      Action::Left => {
+        let (x,y) = window.buffer.cursor;
+        if x > 1 {
+          window.buffer.set_cursor(x-1,y, window.offset+1);
+        }
+      }
+      Action::Right => {
+        let (x,y) = window.buffer.cursor;
+        if x >= 1 {
+          window.buffer.set_cursor(x+1,y, window.offset+1);
+        }
+      }
+      _ => { }
+    }
+  }
+  quit
 }
