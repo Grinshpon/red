@@ -57,10 +57,10 @@ fn main() -> std::io::Result<()> {
 
       let stdin = stdin();
 
-      let mut keymap = KeyMap::default(); // eventually should read an rc file to change keymap appropriately
+      let mut keybindings = KeyBindings::default(); // eventually should read an rc file to change keymap appropriately
 
       for key in stdin.keys() {
-        if perform_action(&keymap, &mut window, &key.unwrap()) {
+        if perform_action(&keybindings, &mut window, &key.unwrap()) {
           break;
         }
         else {

@@ -35,7 +35,7 @@ use crate::buffer::*;
 use std::io::Write;
 use std::fmt::*;
 
-#[derive(Debug)]
+#[derive(Debug,PartialEq)]
 pub enum Mode {
   Command,
   Insert,
@@ -84,7 +84,7 @@ impl Window {
     }
   }
 
-  pub fn clear(&mut self) { //todo: add optional range parameter
+  pub fn clear(&mut self) { //todo: add optional range parameter and error handling
     write!(self.buffer.context, "{}", clear::All);
   }
 
